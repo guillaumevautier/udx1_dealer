@@ -2,13 +2,36 @@
     import Shell from "../lib/Shell.svelte";
     import { ShellModel, Visibility } from "../lib/model";
 
-    let myShell: ShellModel = new ShellModel({
+    let trainerStage:
+        "start" | "drill" | "end"
+        = "end";
+    
+    $: nextButtonLabel = (() => {
+        if (trainerStage === "start") return "start a training";
+        else if (trainerStage === "drill") return "next shell batch";
+        else if (trainerStage === "end") return "restart";
+    })();
+
+    
+        let myShell: ShellModel = new ShellModel({
         id: 0,
         title: "boo",
         summary: "all the boo",
         body: "once upon a time, some boo...",
         importance: "high"
     });
+
+    const next = () => {
+        if (trainerStage === "start") {
+            trainerStage = "drill";
+        }
+        else if (trainerStage === "drill") {
+            trainerStage = "end";
+        }
+        else if (trainerStage === "end") {
+            trainerStage = "start";
+        }
+    };
 
 </script>
 <div>
@@ -19,12 +42,23 @@
     <div class="root-column">
         <div>UDX1 Dealer 1.0.0</div>
         <div>TRAINER</div>
-        <Shell shell={myShell} visibility={Visibility.Summary}/>
-        <Shell />
-        <Shell />
+        {#if trainerStage === "start"}
+            <br>
+            <p>click start to start a training session</p>
+        {:else if trainerStage === "drill"}
+            <Shell shell={myShell} visibility={Visibility.Summary}/>
+            <Shell />
+            <Shell />
+        {:else if trainerStage === "end"}
+            <br>
+            <p>the end!</p>
+            <p>click start to restart a training session</p>
+        {/if}
     </div>
     <div class="root-column">
         <div>COMMANDER</div>
+        <br>
+        <button on:click={next}>{nextButtonLabel}</button>
     </div>
     <div class="root-column"></div>
 </div>
@@ -55,5 +89,9 @@
     }
     .root-column:first-child, .root-column:last-child {
         border: none;
+    }
+    button {
+        text-align: center;
+        width: 100%;
     }
 </style>
