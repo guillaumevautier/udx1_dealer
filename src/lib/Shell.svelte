@@ -48,6 +48,6 @@
         background-color: rgb(255, 249, 231);
     }
     .high {
-        background-color: rgb(255, 218, 255);
+        background-color: rgb(232, 209, 247);
     }
 </style>
