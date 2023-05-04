@@ -9,8 +9,8 @@
     let reviewedShells: ShellModel[] = []; 
     
     // Trainer settings
-    const maxShellDropPerRound = 5;
-    const minShellDropPerRound = 1;
+    const maxShellDropPerRound = 2;
+    const minShellDropPerRound = 2;
     const highImportanceRatio = 0.5;
     
     let trainerStage:
@@ -35,10 +35,12 @@
     const next = () => {
         if (trainerStage === "start") {
             shellToTrain = [...shells]; // not sure if it works
-            console.log("toTrainShells:", shellToTrain); // debug
+            console.log("shellToTrain:", shellToTrain); // debug
             trainerStage = "drill";
         }
         else if (trainerStage === "drill") {
+            
+            console.log("--- ROUND ---");
             
             // There is shell to train
             if (shellToTrain.length !== 0) {
@@ -63,6 +65,8 @@
                         return randInt(thisRoundMinShellDrop, thisRoundMaxShellDrop);
 
                     })();
+                    
+                    console.log("shellCount:", shellCount);  // debug
 
                     const selectedShells: ShellModel[] = (() => {
                         
@@ -70,28 +74,51 @@
                         let randomDice: number;
                         let chooseHigh: boolean;
                         
-                        let importanceShells: ShellModel[];
+                        let importanceShells: ShellModel[] = [];
                         let theShell: ShellModel;
                         let resultShells: ShellModel[] = [];
+
+                        
 
                         // pick for the number of shellCount
                         for (let i = 0; i < shellCount; i++) {
 
+                            console.log("pick run:", i, "--------------------------------");
+
                             // pick by importance
                             importanceDice = Math.random();
+                            console.log("importanceDice:", importanceDice);  // debug
                             chooseHigh = importanceDice <= highImportanceRatio;
 
                             // importance is high
                             if (chooseHigh) {
                                 importanceShells = shellToTrain.filter(shell => shell.importance === "high");
+                                
+                                // if there's no more high shell
+                                if (importanceShells.length === 0) {
+                                    importanceShells = shellToTrain.filter(shell => shell.importance !== "high");
+                                }
                             }
                             // inportance is anything else
                             else {
                                 importanceShells = shellToTrain.filter(shell => shell.importance !== "high");
+                                
+                                // if there's no more low or normal shell
+                                if (importanceShells.length === 0) {
+                                    importanceShells = shellToTrain.filter(shell => shell.importance === "high");
+                                }
+                                
                             }
+                            console.log("chooseHigh:", chooseHigh);  // debug
+                            console.log("importanceShells:", importanceShells);  // debug
+                            
 
                             // pick random shell in importanceShells
-                            theShell = importanceShells[randInt(0, importanceShells.length - 1)];
+                            randomDice = randInt(0, importanceShells.length - 1)
+                            console.log("randomDice:", randomDice);
+                            theShell = importanceShells[randomDice];
+                            console.log("theShell:", theShell);  // debug
+                            
 
                             // add theShell to the resultShell
                             resultShells.push(theShell);
@@ -101,25 +128,28 @@
                             shellToTrain.splice(shellToRemoveIndex, 1);
                         }
 
+                        console.log("resultShells:", resultShells);  // debug
                         return resultShells;
 
                     })();
+                    
+
+                    
 
 
                     let result: ShellModel[] = selectedShells;  // debug
                     return result;  // debug
                 })();
+                console.log("shellThisRound:", shellThisRound);  // debug
+                console.log("shellToTrain:", shellToTrain);  // debug
 
             }
             
             // no more shell to train
             else {
-                console.log("toTrainShells is empty", shellToTrain.length);
+                console.log("shellToTrain is empty", shellToTrain.length);
                 trainerStage = "end";
             }
-            
-            
-            trainerStage = "end";  // debug
         }
         else if (trainerStage === "end") {
             trainerStage = "start";
